@@ -43,3 +43,8 @@ The computer switches between two modes of thinking:
 2. **Minimizing mode** (player's turn):
    - Assumes you'll make moves that get the lowest score
    - Prepares for your best possible moves
+
+
+## Output
+
+![Game Screenshot](game.png)

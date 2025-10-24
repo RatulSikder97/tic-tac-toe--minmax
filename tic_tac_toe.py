@@ -1,4 +1,11 @@
-
+'''
+    @Info 
+    @Assignment: Tic Tac Toe - MinMax
+    @Course: MITE 436
+    @Author: Ratul Sikder
+    @Roll: 2506102
+    @Email: ratulsikder.dev@gmail.com
+'''
 import pygame
 import sys
 import math
