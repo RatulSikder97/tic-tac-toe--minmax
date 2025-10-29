@@ -1,6 +1,6 @@
 '''
     @Info 
-    @Assignment: Tic Tac Toe - Simple MinMax (No Alpha-Beta Pruning)
+    @Assignment: Tic Tac Toe - MinMax
     @Course: MITE 436
     @Author: Ratul Sikder
     @Roll: 2506102
@@ -14,6 +14,7 @@ from typing import List, Optional, Tuple, Dict
 
 pygame.init()
 
+# Constants
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 750
 BOARD_SIZE = 500
@@ -40,11 +41,11 @@ font_tiny = pygame.font.Font(None, 18)
 
 
 
-class TicTacToe:
+class TicTacToeAI:
     
     def __init__(self):
         self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
-        pygame.display.set_caption("Tic-Tac-Toe - Simple MinMax (No Pruning)")
+        pygame.display.set_caption("Tic-Tac-Toe  - MinMax")
         self.clock = pygame.time.Clock()
         
         self.board = [" " for _ in range(9)]
@@ -115,7 +116,7 @@ class TicTacToe:
     def is_game_over(self) -> bool:
         return self.check_winner() is not None or self.is_board_full()
     
-    def minimax_simple(self, depth: int, is_maximizing: bool) -> int:
+    def min_max_run(self, depth: int, is_maximizing: bool, alpha=float('-inf'), beta=float('inf')) -> int:
         self.nodes_evaluated += 1
         
         indent = "  " * depth
@@ -135,37 +136,45 @@ class TicTacToe:
         
         if is_maximizing:
             max_eval = float('-inf')
-            available_moves = self.available_moves()
-            print(f"{indent}AI exploring ALL moves: {[f'({m//3+1},{m%3+1})' for m in available_moves]}")
+            print(f"{indent}AI trying moves: {[f'({m//3+1},{m%3+1})' for m in self.available_moves()]}")
             
-            for move in available_moves:
+            for move in self.available_moves():
                 row, col = move // 3 + 1, move % 3 + 1
                 print(f"{indent}AI tries move ({row},{col})")
                 
                 self.board[move] = self.ai_player
-                eval_score = self.minimax_simple(depth + 1, False)
+                eval_score = self.min_max_run(depth + 1, False, alpha, beta)
                 self.board[move] = " "
                 
                 print(f"{indent}Move ({row},{col}) score: {eval_score}")
                 max_eval = max(max_eval, eval_score)
+                alpha = max(alpha, eval_score)
+                
+                if beta <= alpha:
+                    print(f"{indent}Pruning branch (alpha={alpha}, beta={beta})")
+                    break
             
             print(f"{indent}AI best score at depth {depth}: {max_eval}")
             return max_eval
         else:
             min_eval = float('inf')
-            available_moves = self.available_moves()
-            print(f"{indent}Human exploring ALL moves: {[f'({m//3+1},{m%3+1})' for m in available_moves]}")
+            print(f"{indent}Human considering moves: {[f'({m//3+1},{m%3+1})' for m in self.available_moves()]}")
             
-            for move in available_moves:
+            for move in self.available_moves():
                 row, col = move // 3 + 1, move % 3 + 1
                 print(f"{indent}Human simulates move ({row},{col})")
                 
                 self.board[move] = self.human_player
-                eval_score = self.minimax_simple(depth + 1, True)
+                eval_score = self.min_max_run(depth + 1, True, alpha, beta)
                 self.board[move] = " "
                 
                 print(f"{indent}Move ({row},{col}) score: {eval_score}")
                 min_eval = min(min_eval, eval_score)
+                beta = min(beta, eval_score)
+                
+                if beta <= alpha:
+                    print(f"{indent}Pruning branch (alpha={alpha}, beta={beta})")
+                    break
             
             print(f"{indent}Human best score at depth {depth}: {min_eval}")
             return min_eval
@@ -174,10 +183,9 @@ class TicTacToe:
         if not self.available_moves():
             return None
             
-        print("\n" + "="*60)
-        print("MINIMAX DECISION PROCESS")
-        print("="*60)
-        print("NOTE: This version explores ALL possible game branches")
+        print("\n" + "="*50)
+        print("AI MINIMAX DECISION PROCESS")
+        print("="*50)
         
         self.move_evaluations = {}
         self.nodes_evaluated = 0
@@ -186,15 +194,15 @@ class TicTacToe:
         
         available = self.available_moves()
         print(f"Available moves: {[f'({m//3+1},{m%3+1})' for m in available]}")
-        print("-" * 60)
+        print("-" * 50)
         
         for i, move in enumerate(available):
             row, col = move // 3 + 1, move % 3 + 1
             print(f"\nEVALUATING MOVE {i+1}/{len(available)}: ({row},{col})")
-            print("-" * 40)
+            print("-" * 30)
             
             self.board[move] = self.ai_player
-            score = self.minimax_simple(0, False)
+            score = self.min_max_run(0, False)
             self.move_evaluations[move] = score
             self.board[move] = " "
             
@@ -205,15 +213,14 @@ class TicTacToe:
                 best_move = move
                 print(f"NEW BEST MOVE: ({row},{col}) with score {score}")
         
-        print("\n" + "="*60)
+        print("\n" + "="*50)
         print("FINAL DECISION")
-        print("="*60)
+        print("="*50)
         if best_move is not None:
             row, col = best_move // 3 + 1, best_move % 3 + 1
             print(f"AI chooses: ({row},{col}) with score {best_score}")
             print(f"Total nodes evaluated: {self.nodes_evaluated}")
-            print("(Without pruning, all branches were explored)")
-        print("="*60 + "\n")
+        print("="*50 + "\n")
         
         self.best_move = best_move
         self.best_score = best_score
@@ -234,7 +241,7 @@ class TicTacToe:
         return None
     
     def draw_title(self):
-        title_text = "Tic-Tac-Toe: Simple Minimax (No Pruning)"
+        title_text = "Tic-Tac-Toe: AI vs Human"
         title_surface = font_large.render(title_text, True, BLACK)
         title_rect = title_surface.get_rect(center=(WINDOW_WIDTH // 2, 30))
         self.screen.blit(title_surface, title_rect)
@@ -255,7 +262,7 @@ class TicTacToe:
                 status_text = "It's a Tie!"
                 color = GRAY
         elif self.ai_thinking:
-            status_text = "AI is thinking... (exploring all branches)"
+            status_text = "AI is thinking..."
             color = BLUE
         elif self.current_player == self.human_player:
             status_text = "Your turn (X)"
@@ -336,7 +343,7 @@ class TicTacToe:
     def draw_analysis_panel(self):
         y_offset = ANALYSIS_Y + 20
         
-        title_text = "MINIMAX ANALYSIS"
+        title_text = "AI MINIMAX ANALYSIS"
         title_surface = font_medium.render(title_text, True, BLACK)
         title_rect = title_surface.get_rect(center=(WINDOW_WIDTH // 2, y_offset))
         self.screen.blit(title_surface, title_rect)
@@ -346,10 +353,10 @@ class TicTacToe:
         
         if self.ai_thinking:
             features = [
-                "AI is exploring ALL possible game branches...",
+                "AI is calculating optimal move...",
                 f"Game States Evaluated: {self.nodes_evaluated}",
-                "No Alpha-Beta Pruning - Full Tree Search",
-                "Examining every possible outcome"
+                "Alpha-Beta Pruning Active",
+                "Decision Tree Generation in Progress"
             ]
             
             for i, feature in enumerate(features):
@@ -363,8 +370,8 @@ class TicTacToe:
             result_features = [
                 f"Optimal Move: Position ({row},{col})",
                 f"Score: {getattr(self, 'best_score', 'N/A')} | Nodes: {self.nodes_evaluated}",
-                "",
-                "Complete game tree analysis"
+                "------",
+                ""
             ]
             
             for i, feature in enumerate(result_features):
@@ -375,10 +382,10 @@ class TicTacToe:
         
         else:
             info_features = [
-                "Simple Minimax Algorithm",
-                "Explores all possible game states",
-                "No optimization techniques used",
-                "Educational version for learning"
+                "",
+                "",
+                "",
+                ""
             ]
             
             for i, feature in enumerate(info_features):
@@ -393,7 +400,7 @@ class TicTacToe:
             if self.current_player == self.human_player and not self.ai_thinking:
                 instruction = "Click on empty square to place X  |  R: Restart  |  Q: Quit"
             else:
-                instruction = "AI exploring all branches...  |  R: Restart  |  Q: Quit"
+                instruction = "AI is making optimal move...  |  R: Restart  |  Q: Quit"
         else:
             instruction = "Game Over!  |  R: New Game  |  Q: Quit"
         
@@ -423,7 +430,7 @@ class TicTacToe:
             self.thinking_start_time = time.time()
             return
         
-        if time.time() - self.thinking_start_time < 2.0:
+        if time.time() - self.thinking_start_time < 1.5:
             return
         
         best_move = self.get_best_move()
@@ -494,10 +501,11 @@ class TicTacToe:
         sys.exit()
 
 def main():
-    print("Starting Tic-Tac-Toe ...")
-    print("=" * 60)
+    print("Starting Tic-Tac-Toe with Minimax AI")
+    print("Check console for detailed algorithm output")
+    print("=" * 40)
     
-    game = TicTacToe()
+    game = TicTacToeAI()
     game.run()
 
 if __name__ == "__main__":
