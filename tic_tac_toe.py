@@ -16,7 +16,7 @@ pygame.init()
 
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 750
-BOARD_SIZE = 500
+BOARD_SIZE = 400
 CELL_SIZE = BOARD_SIZE // 3
 BOARD_X = 150
 BOARD_Y = 120
@@ -234,7 +234,7 @@ class TicTacToe:
         return None
     
     def draw_title(self):
-        title_text = "Tic-Tac-Toe: Simple Minimax (No Pruning)"
+        title_text = "Tic-Tac-Toe"
         title_surface = font_large.render(title_text, True, BLACK)
         title_rect = title_surface.get_rect(center=(WINDOW_WIDTH // 2, 30))
         self.screen.blit(title_surface, title_rect)
@@ -348,8 +348,7 @@ class TicTacToe:
             features = [
                 "AI is exploring ALL possible game branches...",
                 f"Game States Evaluated: {self.nodes_evaluated}",
-                "No Alpha-Beta Pruning - Full Tree Search",
-                "Examining every possible outcome"
+               
             ]
             
             for i, feature in enumerate(features):
@@ -363,8 +362,7 @@ class TicTacToe:
             result_features = [
                 f"Optimal Move: Position ({row},{col})",
                 f"Score: {getattr(self, 'best_score', 'N/A')} | Nodes: {self.nodes_evaluated}",
-                "",
-                "Complete game tree analysis"
+                
             ]
             
             for i, feature in enumerate(result_features):
@@ -376,9 +374,7 @@ class TicTacToe:
         else:
             info_features = [
                 "Simple Minimax Algorithm",
-                "Explores all possible game states",
-                "No optimization techniques used",
-                "Educational version for learning"
+                
             ]
             
             for i, feature in enumerate(info_features):
